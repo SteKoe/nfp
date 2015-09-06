@@ -7,8 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         svg {
-            font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+            font-family: sans-serif;
             font-size: 12px;
+            border: 1px solid #efefef;
         }
 
         .temperaturePath {
@@ -21,13 +22,16 @@
         }
 
         .temperatureBubble {
-            fill: #fff;
+            fill: #b00000;
             stroke: #b00000;
             stroke-width: 2;
         }
 
         .axis {
             shape-rendering: crispEdges;
+        }
+        .x.axis {
+            fill: #efefef;
         }
         .x.axis text {
             display: none;
@@ -41,7 +45,7 @@
 
         .y.axis path {
             fill: none;
-            stroke: transparent;
+            stroke: black;
         }
         .y.axis .tick:nth-child(6) line, .y.axis .tick:nth-child(11) line {
             stroke: black;
@@ -68,14 +72,33 @@
         rect.unfruchtbar {
             fill: #e6ffce;
         }
+        text.date, text.time {
+            font-family: monospace;
+            font-size: 10px;
+        }
+
+        text {
+            text-align: right;
+        }
+
+        .mens use {
+            fill: #b00000;
+        }
 
     </style>
 </head>
-<body>
-    <svg></svg>
-
+<body ng-app="de.stekoe.nfp" ng-controller="IndexController">
+    <graph></graph>
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/d3/d3.min.js"></script>
-    <script src="d3.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/core/module.js"></script>
+    <script src="js/core/directives/graph.js"></script>
+    <script src="js/core/services/cervix.js"></script>
+    <script src="js/core/services/temperature.js"></script>
+    <script src="js/core/services/menstruationService.js"></script>
+    <script src="js/core/services/symptothermalMethod.js"></script>
 </body>
 </html>

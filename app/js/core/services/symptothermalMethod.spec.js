@@ -10,7 +10,7 @@ describe('SymptoThermalMethod', function() {
         Cervix = _Cervix_;
     }));
 
-    it('example cycle 1.', function() {
+    fit('example cycle 1.', function() {
         var measurements = [
             {temperature: 36.50, cervix: undefined},
             {temperature: 36.35, cervix: undefined},

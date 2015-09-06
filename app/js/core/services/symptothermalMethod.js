@@ -3,9 +3,17 @@
 angular.module('de.stekoe.nfp')
     .service('SymptothermalMethodService', ['TemperatureService', 'CervixService', function (TemperatureService, CervixService) {
         return {
+            evaluate: evaluate,
             getLastFertileDay: getLastFertileDay,
             isFertileDay: isFertileDay
         };
+
+        function evaluate(measurements) {
+            return {
+                last: getLastFertileDay(measurements),
+                hm: TemperatureService.evaluateMenstrualCycle(measurements)
+            }
+        }
 
         function getLastFertileDay(measurements) {
             if(measurements.length <= 0) {
@@ -15,16 +23,17 @@ angular.module('de.stekoe.nfp')
             var t = TemperatureService.evaluateMenstrualCycle(measurements);
             var c = CervixService.getPeaks(measurements);
 
-            var tempLast3rdDay = t.day + 2;
+            var tempDay = t.day + 2;
+            if(c && c.length > 0) {
+                c = c.filter(function(cervixDay) {
+                    return cervixDay + 3 >= tempDay;
+                }).pop();
 
-            c = c.filter(function(t) {
-                return t <= tempLast3rdDay;
-            }).pop();
-
-            if(c) {
-                return c + 3;
-            } else {
-                return tempLast3rdDay;
+                if(c) {
+                    return c + 3;
+                } else {
+                    return tempDay;
+                }
             }
 
             return false;
