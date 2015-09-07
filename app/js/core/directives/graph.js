@@ -62,8 +62,8 @@ angular.module('de.stekoe.nfp.core')
                 }, 0);
 
 
-            var svgMargin = [5, 5, 5, 75]; // margins
-            var svgHeight = (sumGraphHeights + 100) + svgMargin[0] + svgMargin[2];
+            var svgMargin = [0, 0, 0, 75]; // margins
+            var svgHeight = (460) + svgMargin[0] + svgMargin[2];
             var svgWidth = svgMargin[3] + (40 * 15) - svgMargin[1] - svgMargin[3]; // width
             var graphWidth = svgWidth;
 
@@ -116,12 +116,10 @@ angular.module('de.stekoe.nfp.core')
                     .text(function (d, i) {
                         return i + 1;
                     });
-                var t = cycleDayNumber.append('text')
-                    .attr('text-anchor', 'right')
+                cycleDayNumber.append('text')
+                    .attr('text-anchor', 'end')
+                    .attr('transform', 'translate(-3, 415)')
                     .text("ZT");
-
-                var textWidth = t[0][0].clientWidth;
-                t.attr('transform', 'translate(' + -(3 + textWidth) + ', 415)');
             }
 
             function drawDates() {
@@ -224,8 +222,7 @@ angular.module('de.stekoe.nfp.core')
 
                 // line with bubbles
                 temperatureGraph.selectAll('.temperaturePath')
-                    .remove()
-                    .data(measurements)
+                    .data(data.measurements)
                     .enter()
                     .append("svg:line")
                     .attr("class", function (d, i) {
@@ -305,12 +302,10 @@ angular.module('de.stekoe.nfp.core')
                         });
                 }
 
-                var t = cervixGraph.append('text')
-                    .attr('text-anchor', 'right')
+                cervixGraph.append('text')
+                    .attr('text-anchor', 'end')
+                    .attr('transform', 'translate(-3, 15)')
                     .text(label);
-
-                var textWidth = t[0][0].clientWidth;
-                t.attr('transform', 'translate(' + -(3 + textWidth) + ', 15)');
             }
         }
 
