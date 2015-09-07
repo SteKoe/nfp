@@ -23,16 +23,15 @@ angular.module('de.stekoe.nfp')
             var t = TemperatureService.evaluateMenstrualCycle(measurements);
             var c = CervixService.getPeaks(measurements);
 
-            var tempDay = t.day + 2;
             if(c && c.length > 0) {
                 c = c.filter(function(cervixDay) {
-                    return cervixDay + 3 >= tempDay;
+                    return cervixDay >= t.day && cervixDay <= t.day + 2;
                 }).pop();
 
                 if(c) {
                     return c + 3;
                 } else {
-                    return tempDay;
+                    return t.day + 2;
                 }
             }
 
