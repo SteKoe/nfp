@@ -109,8 +109,13 @@ angular.module('de.stekoe.nfp.core')
                 return (symbol) ? ['#cervix-', symbol].join('') : null;
             }});
             drawSimpleGraph("Love", {marginTop: graphs.love.marginTop, symbolFn: function(d) {
-                console.log(d);
-                return "#heart"
+                var clazz = ['#'];
+                if(d.love === 1) {
+                    clazz.push('heart');
+                } else if(d.love === 2) {
+                    clazz.push('heart-safe');
+                }
+                return clazz.join('')
             }});
 
             function drawCycleDayNumbers() {
