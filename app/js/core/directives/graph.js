@@ -43,6 +43,10 @@ angular.module('de.stekoe.nfp.core')
                 dates: {
                     height: 100
                 },
+                zt: {
+                    height: 20,
+                    marginTop: 400
+                },
                 temperature: {
                     height: 300,
                     marginTop: 100
@@ -50,10 +54,15 @@ angular.module('de.stekoe.nfp.core')
                 cervix: {
                     height: 20,
                     marginTop: 420
+                },
+                love: {
+                    height: 20,
+                    marginTop: 460
                 }
             };
 
-            var sumGraphHeights = Object.keys(graphs)
+            var graphTypes = Object.keys(graphs);
+            var sumGraphHeights = graphTypes
                 .map(function (graphType) {
                     return graphs[graphType];
                 })
@@ -61,9 +70,8 @@ angular.module('de.stekoe.nfp.core')
                     return prev + cur.height;
                 }, 0);
 
-
             var svgMargin = [0, 0, 0, 75]; // margins
-            var svgHeight = (460) + svgMargin[0] + svgMargin[2];
+            var svgHeight = (sumGraphHeights + graphs[graphTypes[graphTypes.length - 1]].height) + svgMargin[0] + svgMargin[2];
             var svgWidth = svgMargin[3] + (40 * 15) - svgMargin[1] - svgMargin[3]; // width
             var graphWidth = svgWidth;
 
@@ -88,19 +96,22 @@ angular.module('de.stekoe.nfp.core')
                 .call(xAxis);
 
             drawDates();
-            drawCycleDayNumbers();
             drawTemperatureGraph();
+            drawCycleDayNumbers();
 
-            var symbolFn = function (d) {
-                var symbol = CervixService.getSymbol(d.cervix);
-                return (symbol) ? ['#cervix-', symbol].join('') : null;
-            };
             drawSimpleGraph("Mens", {
                 marginTop: 420, symbolFn: function (d) {
                     return ['#mens-', MenstruationService.getSymbol(d.menstruation)].join('');
                 }
             });
-            drawSimpleGraph("Zervix", {marginTop: 440, symbolFn: symbolFn});
+            drawSimpleGraph("Zervix", {marginTop: 440, symbolFn: function (d) {
+                var symbol = CervixService.getSymbol(d.cervix);
+                return (symbol) ? ['#cervix-', symbol].join('') : null;
+            }});
+            drawSimpleGraph("Love", {marginTop: graphs.love.marginTop, symbolFn: function(d) {
+                console.log(d);
+                return "#heart"
+            }});
 
             function drawCycleDayNumbers() {
                 var cycleDayNumber = canvas.append('svg:g');
@@ -108,10 +119,16 @@ angular.module('de.stekoe.nfp.core')
                     .data(dates)
                     .enter()
                     .append('svg:text')
-                    .attr('class', 'day')
+                    .attr('class', function(d) {
+                        var classes = ['day'];
+                        if(isWeekend(d)) {
+                            classes.push('weekend');
+                        }
+                        return classes.join(' ');
+                    })
                     .attr('text-anchor', 'middle')
                     .attr('transform', function (d) {
-                        return 'translate(' + x(d3.time.hour.offset(d, 12)) + ', 415)'
+                        return 'translate(' + x(d3.time.hour.offset(d, 12)) + ', ' + (graphs.zt.marginTop + 15) + ')'
                     })
                     .text(function (d, i) {
                         return i + 1;
@@ -131,7 +148,13 @@ angular.module('de.stekoe.nfp.core')
                     .data(dates)
                     .enter()
                     .append('svg:text')
-                    .attr('class', 'date')
+                    .attr('class', function(d) {
+                        var classes = ['date'];
+                        if(isWeekend(d)) {
+                            classes.push('weekend');
+                        }
+                        return classes.join(' ');
+                    })
                     .attr('transform', function (d, i) {
                         var offset = d3.time.hour.offset(d, 16);
                         return 'translate(' + x(offset) + ', ' + (graphs.dates.height - 50) + ')  rotate(-90)'
@@ -145,7 +168,13 @@ angular.module('de.stekoe.nfp.core')
                     .data(data.measurements)
                     .enter()
                     .append('svg:text')
-                    .attr('class', 'time')
+                    .attr('class', function(d) {
+                        var classes = ['time'];
+                        if(isWeekend(d.date)) {
+                            classes.push('weekend');
+                        }
+                        return classes.join(' ');
+                    })
                     .attr('transform', function (d) {
                         return 'translate(' + x(d3.time.hour.offset(d.date, 16)) + ', ' + (graphs.dates.height - 5) + ')  rotate(-90)'
                     })
@@ -307,7 +336,10 @@ angular.module('de.stekoe.nfp.core')
                     .attr('transform', 'translate(-3, 15)')
                     .text(label);
             }
+
+            function isWeekend(date) {
+                var dayOfWeek = date.getDay();
+                return dayOfWeek === 0 || dayOfWeek === 6;
+            }
         }
-
-
     });
