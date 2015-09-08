@@ -244,7 +244,7 @@ angular.module('de.stekoe.nfp.core')
                 if (coverTemp) {
                     temperatureGraph.append('svg:line')
                         .attr('id', 'coverline')
-                        .attr("x1", 0)
+                        .attr("x1", x(measurements[hm - 5].date))
                         .attr("y1", function () {
                             return y(coverTemp)
                         })
@@ -302,7 +302,13 @@ angular.module('de.stekoe.nfp.core')
                     .style("display", function (d) {
                         return d.temperature === 0 ? "none" : null;
                     })
-                    .attr("r", '2.5');
+                    .attr("r", '2.5')
+                    .on('mouseover', function(d, i) {
+                        var tooltip = createTooltip("Messung " + (i+1) + ": "+ d.temperature + "°C");
+                        tooltip.style("top", (d3.event.pageY-10)+"px")
+                            .style("left",(d3.event.pageX+10)+"px")
+                            .style("visibility", "visible");
+                    });
             }
 
             // == LE GRAPH DE CERVIX =====
@@ -345,6 +351,19 @@ angular.module('de.stekoe.nfp.core')
             function isWeekend(date) {
                 var dayOfWeek = date.getDay();
                 return dayOfWeek === 0 || dayOfWeek === 6;
+            }
+
+            function createTooltip(text) {
+                var tooltip = d3.select('.tooltip');
+                if(tooltip.empty()) {
+                    tooltip = d3.select("body")
+                        .append('div')
+                        .attr('class', 'tooltip');
+                }
+
+                tooltip.text(text);
+
+                return tooltip;
             }
         }
     });
