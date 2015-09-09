@@ -52,34 +52,36 @@ angular.module('de.stekoe.nfp')
             var hm = get1stHM(measurements) - 1;
             var coverTemp = getCoverTemperature(measurements);
 
-            // Check one after the other because combination is not allowed
-            if (evaluateUsingDefaultRule(hm, coverTemp, measurements)) {
-                return {
-                    hm: measurements[hm],
-                    day: hm + 1,
-                    coverTemp: coverTemp,
-                    rule: {
-                        name: 'default'
-                    }
-                };
-            } else if (evaluateUsingFirstExeptionalRule(hm, coverTemp, measurements)) {
-                return {
-                    hm: measurements[hm],
-                    day: hm + 1,
-                    coverTemp: coverTemp,
-                    rule: {
-                        name: '1st Exceptional Rule'
-                    }
-                };
-            } else if (evaluateUsingSecondExeptionalRule(hm, coverTemp, measurements)) {
-                return {
-                    hm: measurements[hm],
-                    day: hm + 1,
-                    coverTemp: coverTemp,
-                    rule: {
-                        name: '2nd Exceptional Rule'
-                    }
-                };
+            if(hm != -1) {
+                // Check one after the other because combination is not allowed
+                if (evaluateUsingDefaultRule(hm, coverTemp, measurements)) {
+                    return {
+                        hm: measurements[hm],
+                        day: hm + 1,
+                        coverTemp: coverTemp,
+                        rule: {
+                            name: 'default'
+                        }
+                    };
+                } else if (evaluateUsingFirstExeptionalRule(hm, coverTemp, measurements)) {
+                    return {
+                        hm: measurements[hm],
+                        day: hm + 1,
+                        coverTemp: coverTemp,
+                        rule: {
+                            name: '1st Exceptional Rule'
+                        }
+                    };
+                } else if (evaluateUsingSecondExeptionalRule(hm, coverTemp, measurements)) {
+                    return {
+                        hm: measurements[hm],
+                        day: hm + 1,
+                        coverTemp: coverTemp,
+                        rule: {
+                            name: '2nd Exceptional Rule'
+                        }
+                    };
+                }
             }
 
             return false;
@@ -96,7 +98,7 @@ angular.module('de.stekoe.nfp')
              * @returns {boolean} true if temperature has been evaluated using default rule, false otherwise.
              */
             function evaluateUsingDefaultRule(hm, coverTemp, measurements) {
-                if (hm + 2 <= measurements.length) {
+                if (hm + 2 < measurements.length) {
                     var hm2 = measurements[hm + 1].temperature;
                     var hm3 = measurements[hm + 2].temperature;
                     if (hm2 > coverTemp && round(hm3 - 0.2) >= coverTemp) {

@@ -22,6 +22,7 @@ angular.module('de.stekoe.nfp.core')
             templateUrl: '/js/core/directives/graph.html',
             link: function (scope, element) {
                 svgElement = element.find('svg')[0];
+
                 scope.$watch('data', function () {
                     if (scope.data) {
                         drawGraph(scope.data);
@@ -31,11 +32,11 @@ angular.module('de.stekoe.nfp.core')
         };
 
         function drawGraph(data) {
-            var measurements = data.measurements;
-            var dates = [];
-            var maxDateCount = (measurements.length < 30) ? 30 : Math.floor(measurements.length / 10) * 10 + 10;
-            for (var i = 0; i < maxDateCount; i++) {
-                dates.push(d3.time.day.offset(measurements[0].date, i));
+            var maxDateCount = (data.measurements.length < 30) ? 30 : Math.floor(data.measurements.length / 10) * 10 + 10;
+            for (var i = data.measurements.length; i < maxDateCount; i++) {
+                data.measurements.push({
+                    date: d3.time.day.offset(data.measurements[i - 1].date, 1)
+                });
             }
 
             // SVG Canvas
@@ -70,9 +71,11 @@ angular.module('de.stekoe.nfp.core')
                     return prev + cur.height;
                 }, 0);
 
+            console.log(data.measurements.length);
+
             var svgMargin = [0, 0, 0, 75]; // margins
             var svgHeight = (sumGraphHeights + graphs[graphTypes[graphTypes.length - 1]].height) + svgMargin[0] + svgMargin[2];
-            var svgWidth = svgMargin[3] + (40 * 15) - svgMargin[1] - svgMargin[3]; // width
+            var svgWidth = ((data.measurements.length) * 20); // width
             var graphWidth = svgWidth;
 
             var canvas = d3.select(svgElement)
@@ -96,7 +99,9 @@ angular.module('de.stekoe.nfp.core')
                 .call(xAxis);
 
             drawDates();
-            drawTemperatureGraph();
+            if(data.evaluated) {
+                drawTemperatureGraph();
+            }
             drawCycleDayNumbers();
 
             drawSimpleGraph("Mens", {
@@ -104,36 +109,41 @@ angular.module('de.stekoe.nfp.core')
                     return ['#mens-', MenstruationService.getSymbol(d.menstruation)].join('');
                 }
             });
-            drawSimpleGraph("Zervix", {marginTop: 440, symbolFn: function (d) {
-                var symbol = CervixService.getSymbol(d.cervix);
-                return (symbol) ? ['#cervix-', symbol].join('') : null;
-            }});
-            drawSimpleGraph("Love", {marginTop: graphs.love.marginTop, symbolFn: function(d) {
-                var clazz = ['#'];
-                if(d.love === 1) {
-                    clazz.push('heart');
-                } else if(d.love === 2) {
-                    clazz.push('heart-safe');
+            drawSimpleGraph("Zervix", {
+                marginTop: 440, symbolFn: function (d) {
+                    var symbol = CervixService.getSymbol(d.cervix);
+                    return (symbol) ? ['#cervix-', symbol].join('') : null;
                 }
-                return clazz.join('')
-            }});
+            });
+            drawSimpleGraph("Love", {
+                marginTop: graphs.love.marginTop, symbolFn: function (d) {
+                    var clazz = ['#'];
+                    if (d.love === 1) {
+                        clazz.push('heart');
+                    } else if (d.love === 2) {
+                        clazz.push('heart-safe');
+                    }
+                    return clazz.join('')
+                }
+            });
 
             function drawCycleDayNumbers() {
                 var cycleDayNumber = canvas.append('svg:g');
                 cycleDayNumber.selectAll('.day')
-                    .data(dates)
+                    .data(data.measurements.map(function(d) { return d.date; }))
                     .enter()
                     .append('svg:text')
-                    .attr('class', function(d) {
+                    .attr('class', function (d) {
                         var classes = ['day'];
-                        if(isWeekend(d)) {
+                        if (isWeekend(d)) {
                             classes.push('weekend');
                         }
                         return classes.join(' ');
                     })
                     .attr('text-anchor', 'middle')
                     .attr('transform', function (d) {
-                        return 'translate(' + x(d3.time.hour.offset(d, 12)) + ', ' + (graphs.zt.marginTop + 15) + ')'
+                        var xVal = (d) ? x(d3.time.hour.offset(d, 12)) : 0;
+                        return 'translate(' + xVal + ', ' + (graphs.zt.marginTop + 15) + ')'
                     })
                     .text(function (d, i) {
                         return i + 1;
@@ -150,37 +160,40 @@ angular.module('de.stekoe.nfp.core')
                     .attr('transform', 'translate(0, ' + (graphs.dates.marginTop || 0) + ')');
 
                 dateGraph.selectAll('.date')
-                    .data(dates)
+                    .data(data.measurements.map(function(d) { return d.date; }))
                     .enter()
                     .append('svg:text')
-                    .attr('class', function(d) {
+                    .attr('class', function (d) {
                         var classes = ['date'];
-                        if(isWeekend(d)) {
+                        if (isWeekend(d)) {
                             classes.push('weekend');
                         }
                         return classes.join(' ');
                     })
-                    .attr('transform', function (d, i) {
-                        var offset = d3.time.hour.offset(d, 16);
-                        return 'translate(' + x(offset) + ', ' + (graphs.dates.height - 50) + ')  rotate(-90)'
+                    .attr('transform', function (d) {
+                        var xVal = (d) ? x(d3.time.hour.offset(d, 16)) : 0;
+                        return 'translate(' + xVal + ', ' + (graphs.dates.height - 50) + ')  rotate(-90)'
                     })
                     .text(function (d) {
-                        var date = locale.timeFormat("%a %d.%m");
-                        return date(d);
+                        if(d) {
+                            var date = locale.timeFormat("%a %d.%m");
+                            return date(d);
+                        }
                     });
 
                 dateGraph.selectAll('.time')
                     .data(data.measurements)
                     .enter()
                     .append('svg:text')
-                    .attr('class', function(d) {
+                    .attr('class', function (d) {
                         var classes = ['time'];
-                        if(isWeekend(d.date)) {
+                        if (isWeekend(d.date)) {
                             classes.push('weekend');
                         }
                         return classes.join(' ');
                     })
                     .attr('transform', function (d) {
+                        var xVal = (d) ? x(d3.time.hour.offset(d, 16)) : 0;
                         return 'translate(' + x(d3.time.hour.offset(d.date, 16)) + ', ' + (graphs.dates.height - 5) + ')  rotate(-90)'
                     })
                     .text(function (d) {
@@ -272,24 +285,18 @@ angular.module('de.stekoe.nfp.core')
                         }
                     })
                     .attr("y1", function (d, i) {
-                        if (i > 0) {
+                        if (i > 0 && i <= measurements.length && measurements[i - 1].temperature) {
                             return y(measurements[i - 1].temperature)
                         }
                     })
                     .attr("x2", function (d) {
-                        return x(d3.time.hour.offset(d.date, 12));
+                        return (d.date) ? x(d3.time.hour.offset(d.date, 12)) : 0;
                     })
                     .attr("y2", function (d) {
-                        return y(d.temperature)
+                        return (d.temperature) ? y(d.temperature) : 0;
                     })
                     .style("display", function (d, i) {
-                        if (i === 0) {
-                            return "none";
-                        } else if (!d.temperature || d.temperature === 0) {
-                            return "none";
-                        } else {
-                            return null;
-                        }
+                        return (i !== 0 && d.temperature && d.temperature >= 0) ? null : "none";
                     });
                 temperatureGraph.selectAll('.temperatureBubble')
                     .data(measurements)
@@ -297,16 +304,18 @@ angular.module('de.stekoe.nfp.core')
                     .append('circle')
                     .attr("class", 'temperatureBubble')
                     .attr("transform", function (d) {
-                        return "translate(" + x(d3.time.hour.offset(d.date, 12)) + "," + y(d.temperature) + ")";
+                        var xVal = (d.date) ? x(d3.time.hour.offset(d.date, 12)) : 0;
+                        var yVal = (d.temperature) ? y(d.temperature) : 0;
+                        return "translate(" + xVal + "," + yVal + ")";
                     })
                     .style("display", function (d) {
-                        return d.temperature === 0 ? "none" : null;
+                        return (d.temperature && d.temperature >= 0) ? null : "none";
                     })
                     .attr("r", '2.5')
-                    .on('mouseover', function(d, i) {
-                        var tooltip = createTooltip("Messung " + (i+1) + ": "+ d.temperature + "°C");
-                        tooltip.style("top", (d3.event.pageY-10)+"px")
-                            .style("left",(d3.event.pageX+10)+"px")
+                    .on('mouseover', function (d, i) {
+                        var tooltip = createTooltip("Messung " + (i + 1) + ": " + d.temperature + "°C");
+                        tooltip.style("top", (d3.event.pageY - 10) + "px")
+                            .style("left", (d3.event.pageX + 10) + "px")
                             .style("visibility", "visible");
                     });
             }
@@ -349,13 +358,15 @@ angular.module('de.stekoe.nfp.core')
             }
 
             function isWeekend(date) {
-                var dayOfWeek = date.getDay();
-                return dayOfWeek === 0 || dayOfWeek === 6;
+                if(date) {
+                    var dayOfWeek = date.getDay();
+                    return dayOfWeek === 0 || dayOfWeek === 6;
+                }
             }
 
             function createTooltip(text) {
                 var tooltip = d3.select('.tooltip');
-                if(tooltip.empty()) {
+                if (tooltip.empty()) {
                     tooltip = d3.select("body")
                         .append('div')
                         .attr('class', 'tooltip');

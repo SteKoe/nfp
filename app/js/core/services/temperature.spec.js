@@ -144,5 +144,13 @@ describe('TemperatureService', function () {
         var cycle = [{}, {}, {}, {}, {}];
         cycle = cycle.concat(evaluableMenstrualCycle.slice(0));
         expect(temperatureService.get1stHM(cycle)).toBe(21);
-    })
+    });
+
+    it('can handle just one measurement.', function() {
+        var cycle = [{
+            temperature: 36.70
+        }];
+
+        expect(temperatureService.evaluateMenstrualCycle(cycle)).toBe(false);
+    });
 });
