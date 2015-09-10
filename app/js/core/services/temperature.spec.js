@@ -40,15 +40,11 @@ describe('TemperatureService', function () {
     }));
 
     it('returns -1 when no HM is found.', function () {
-        expect(temperatureService.get1stHM([])).toBe(0);
+        expect(temperatureService.get1stHM([]).day).toBe(0);
     });
 
     it('returns 15 as first HM.', function () {
-        expect(temperatureService.get1stHM(evaluableMenstrualCycle)).toBe(16);
-    });
-
-    it('returns 36.6 as cover temperature.', function () {
-        expect(temperatureService.getCoverTemperature(evaluableMenstrualCycle)).toBe(36.6);
+        expect(temperatureService.get1stHM(evaluableMenstrualCycle).day).toBe(16);
     });
 
     it('rounds values according to NFP rules.', function () {
@@ -74,7 +70,7 @@ describe('TemperatureService', function () {
     it('returns object when cycle can be evaluated.', function () {
         var evaluation = temperatureService.evaluateMenstrualCycle(evaluableMenstrualCycle);
 
-        expect(evaluation.hm).toEqual({temperature: 36.8});
+        expect(evaluation.hm).toEqual(36.8);
         expect(evaluation.day).toEqual(16);
         expect(evaluation.rule.name).toBe('default');
         expect(evaluation.coverTemp).toBe(36.6);
@@ -99,12 +95,9 @@ describe('TemperatureService', function () {
             {temperature: 36.80}
         ];
 
-        expect(temperatureService.getCoverTemperature(temps)).toBe(36.7);
-        expect(temperatureService.get1stHM(temps)).toBe(12);
-
         var evaluation = temperatureService.evaluateMenstrualCycle(temps);
         expect(evaluation).not.toBeFalsy();
-        expect(evaluation.hm).toEqual({temperature: 36.75});
+        expect(evaluation.hm).toEqual(36.75);
         expect(evaluation.day).toEqual(12);
         expect(evaluation.rule.name).toBe('1st Exceptional Rule');
         expect(evaluation.coverTemp).toBe(36.7);
@@ -129,12 +122,9 @@ describe('TemperatureService', function () {
             {temperature: 36.90}
         ];
 
-        expect(temperatureService.getCoverTemperature(temps)).toBe(36.7);
-        expect(temperatureService.get1stHM(temps)).toBe(12);
-
         var evaluation = temperatureService.evaluateMenstrualCycle(temps);
         expect(evaluation).not.toBeFalsy();
-        expect(evaluation.hm).toEqual({temperature: 36.8});
+        expect(evaluation.hm).toEqual(36.8);
         expect(evaluation.day).toEqual(12);
         expect(evaluation.rule.name).toBe('2nd Exceptional Rule');
         expect(evaluation.coverTemp).toBe(36.7);
@@ -143,7 +133,7 @@ describe('TemperatureService', function () {
     it('can evaluate cycle having missing temps.', function () {
         var cycle = [{}, {}, {}, {}, {}];
         cycle = cycle.concat(evaluableMenstrualCycle.slice(0));
-        expect(temperatureService.get1stHM(cycle)).toBe(21);
+        expect(temperatureService.get1stHM(cycle).day).toBe(21);
     });
 
     it('can handle just one measurement.', function() {

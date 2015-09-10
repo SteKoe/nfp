@@ -9,9 +9,14 @@ angular.module('de.stekoe.nfp')
         };
 
         function evaluate(measurements) {
+            var exclusions = measurements.filter(function(d) {
+                return d.exclude;
+            });
+
             return {
                 last: getLastFertileDay(measurements),
-                hm: TemperatureService.evaluateMenstrualCycle(measurements)
+                hm: TemperatureService.evaluateMenstrualCycle(measurements),
+                exclusions: exclusions
             }
         }
 

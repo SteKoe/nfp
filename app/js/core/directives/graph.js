@@ -1,5 +1,5 @@
 angular.module('de.stekoe.nfp.core')
-    .directive('graph', function (CervixService, MenstruationService) {
+    .directive('graph', function (CervixService, MenstruationService, Cervix) {
         var svgElement;
 
         var de_DE = {
@@ -39,6 +39,33 @@ angular.module('de.stekoe.nfp.core')
                 });
             }
 
+            if(data.evaluated) {
+                console.log(data.evaluated);
+                var text = "<strong>Debug</strong><p>Am %day%. Tag des Zyklus ist die 1.HM mit einer Temperatur von %hm%°C aufgetreten. \
+                            Die Cover-Temperatur beträgt %coverTemp%°C. Der letzte fruchtbare Tag ist %last%. Insgesamt wurden %excludedDaysCount% Werte ausgeklammert.</p>";
+
+                var dateFormatter = locale.timeFormat("%A, der %d.%m.%Y");
+                text = text.split('%last%').join(dateFormatter(data.measurements[data.evaluated.last - 1].date));
+                text = text.split('%excludedDaysCount%').join(data.evaluated.exclusions.length);
+
+                d3.select('.nfp-debug')
+                    .html(replacePlaceholder(text));
+
+                function replacePlaceholder(text) {
+                    var infos = {
+                        hm: 'Hochmessung',
+                        coverTemp: 'Cover Temperature',
+                        day: 'Tag'
+                    };
+                    Object.keys(infos).forEach(function(key) {
+                        var val = data.evaluated.hm[key] || "";
+                        text = text.split('%' + key + '%').join(val);
+                    });
+
+                    return text;
+                }
+            }
+
             // SVG Canvas
             var graphs = {
                 dates: {
@@ -71,8 +98,6 @@ angular.module('de.stekoe.nfp.core')
                     return prev + cur.height;
                 }, 0);
 
-            console.log(data.measurements.length);
-
             var svgMargin = [0, 0, 0, 75]; // margins
             var svgHeight = (sumGraphHeights + graphs[graphTypes[graphTypes.length - 1]].height) + svgMargin[0] + svgMargin[2];
             var svgWidth = ((data.measurements.length) * 20); // width
@@ -99,7 +124,7 @@ angular.module('de.stekoe.nfp.core')
                 .call(xAxis);
 
             drawDates();
-            if(data.evaluated) {
+            if (data.evaluated) {
                 drawTemperatureGraph();
             }
             drawCycleDayNumbers();
@@ -128,9 +153,12 @@ angular.module('de.stekoe.nfp.core')
             });
 
             function drawCycleDayNumbers() {
-                var cycleDayNumber = canvas.append('svg:g');
+                var cycleDayNumber = canvas.append('svg:g')
+                    .attr('class', 'graph days');
                 cycleDayNumber.selectAll('.day')
-                    .data(data.measurements.map(function(d) { return d.date; }))
+                    .data(data.measurements.map(function (d) {
+                        return d.date;
+                    }))
                     .enter()
                     .append('svg:text')
                     .attr('class', function (d) {
@@ -156,11 +184,13 @@ angular.module('de.stekoe.nfp.core')
 
             function drawDates() {
                 var dateGraph = canvas.append('svg:g')
-                    .attr('class', 'dates')
+                    .attr('class', 'graph dates')
                     .attr('transform', 'translate(0, ' + (graphs.dates.marginTop || 0) + ')');
 
                 dateGraph.selectAll('.date')
-                    .data(data.measurements.map(function(d) { return d.date; }))
+                    .data(data.measurements.map(function (d) {
+                        return d.date;
+                    }))
                     .enter()
                     .append('svg:text')
                     .attr('class', function (d) {
@@ -175,7 +205,7 @@ angular.module('de.stekoe.nfp.core')
                         return 'translate(' + xVal + ', ' + (graphs.dates.height - 50) + ')  rotate(-90)'
                     })
                     .text(function (d) {
-                        if(d) {
+                        if (d) {
                             var date = locale.timeFormat("%a %d.%m");
                             return date(d);
                         }
@@ -208,7 +238,7 @@ angular.module('de.stekoe.nfp.core')
                     measurements = data.measurements;
 
                 var temperatureGraph = canvas.append('svg:g')
-                    .attr('class', 'temperature-graph')
+                    .attr('class', 'graph temperature')
                     .attr('transform', 'translate(0, ' + (graphs.temperature.marginTop || 0) + ')');
 
                 // Cycle Graph
@@ -216,11 +246,29 @@ angular.module('de.stekoe.nfp.core')
                     .domain([35.9, 37.5])
                     .range([graphs.temperature.height, 0]);
 
-                temperatureGraph.append('svg:rect')
-                    .attr('class', 'unfruchtbar')
-                    .attr('width', x(d3.time.day.offset(measurements[0].date, 5)))
-                    .attr('height', graphs.temperature.height)
-                    .attr('transform', 'translate(0, 0)');
+                measurements
+                    .forEach(function (measurement, idx) {
+                        if(measurement.start) {
+                            var end = 5;
+                            for(var i = idx; i < idx + 5 && i < measurements.length; i++) {
+                                var cervix = measurements[i].cervix;
+                                if(cervix && cervix >= Cervix.f) {
+                                    end = i - 2;
+                                    break;
+                                }
+                            }
+
+                            temperatureGraph.append('svg:rect')
+                                .attr('class', 'unfruchtbar')
+                                .attr('width', end * 20)
+                                .attr('height', graphs.temperature.height)
+                                .attr('transform', function() {
+                                    var xVal = x(measurement.date);
+                                    return 'translate(' + xVal + ', 0)';
+                                });
+                        }
+                    });
+
                 if (last) {
                     var offsetX = x(d3.time.hour.offset(measurements[last - 1].date, 12));
                     temperatureGraph.append('svg:rect')
@@ -257,7 +305,7 @@ angular.module('de.stekoe.nfp.core')
                 if (coverTemp) {
                     temperatureGraph.append('svg:line')
                         .attr('id', 'coverline')
-                        .attr("x1", x(measurements[hm - 5].date))
+                        .attr("x1", 0)
                         .attr("y1", function () {
                             return y(coverTemp)
                         })
@@ -302,7 +350,13 @@ angular.module('de.stekoe.nfp.core')
                     .data(measurements)
                     .enter()
                     .append('circle')
-                    .attr("class", 'temperatureBubble')
+                    .attr("class", function (d) {
+                        var clazz = ['temperatureBubble'];
+                        if (d.exclude) {
+                            clazz.push('excludedValue');
+                        }
+                        return clazz.join(' ');
+                    })
                     .attr("transform", function (d) {
                         var xVal = (d.date) ? x(d3.time.hour.offset(d.date, 12)) : 0;
                         var yVal = (d.temperature) ? y(d.temperature) : 0;
@@ -317,7 +371,26 @@ angular.module('de.stekoe.nfp.core')
                         tooltip.style("top", (d3.event.pageY - 10) + "px")
                             .style("left", (d3.event.pageX + 10) + "px")
                             .style("visibility", "visible");
+                    })
+                    .on('mouseout', function () {
+                        d3.selectAll('.tooltip').remove();
                     });
+                temperatureGraph.selectAll('.excludedTemperatureBrace')
+                    .data(measurements)
+                    .enter()
+                    .append('text')
+                    .attr('class', 'excludedTemperatureBrace')
+                    .attr('text-anchor', 'middle')
+                    .attr("xml:space","preserve")
+                    .attr("transform", function (d) {
+                        var xVal = (d.date) ? x(d3.time.hour.offset(d.date, 12)) : 0;
+                        var yVal = (d.temperature) ? y(d.temperature) + 3 : 0;
+                        return "translate(" + xVal + "," + yVal + ")";
+                    })
+                    .style("display", function (d) {
+                        return (d.exclude) ? null : "none";
+                    })
+                    .text('(   )');
             }
 
             // == LE GRAPH DE CERVIX =====
@@ -358,7 +431,7 @@ angular.module('de.stekoe.nfp.core')
             }
 
             function isWeekend(date) {
-                if(date) {
+                if (date) {
                     var dayOfWeek = date.getDay();
                     return dayOfWeek === 0 || dayOfWeek === 6;
                 }
