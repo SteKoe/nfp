@@ -135,9 +135,15 @@ angular.module('de.stekoe.nfp.core')
                 }
             });
             drawSimpleGraph("Zervix", {
-                marginTop: 440, symbolFn: function (d) {
+                marginTop: 440,
+                symbolFn: function (d) {
                     var symbol = CervixService.getSymbol(d.cervix);
                     return (symbol) ? ['#cervix-', symbol].join('') : null;
+                },
+                background: {
+                    clazz: function(d) {
+                        return d.cervixPeak ? 'peak' : null;
+                    }
                 }
             });
             drawSimpleGraph("Love", {
@@ -186,6 +192,24 @@ angular.module('de.stekoe.nfp.core')
                 var dateGraph = canvas.append('svg:g')
                     .attr('class', 'graph dates')
                     .attr('transform', 'translate(0, ' + (graphs.dates.marginTop || 0) + ')');
+
+                dateGraph.selectAll('.dateBg')
+                    .data(data.measurements)
+                    .enter()
+                    .append('svg:rect')
+                    .attr('class', function(d) {
+                        return isWeekend(d.date) ? 'dateBg weekend' : 'dateBg';
+                    })
+                    .attr('width', 20)
+                    .attr('height', svgHeight)
+                    .style('display', function(d) {
+                        return isWeekend(d.date) ? null : 'none';
+                    })
+                    .attr('transform', function (d) {
+                        console.log(d);
+                        var xVal = (d.date) ? x(d.date) : 0;
+                        return 'translate(' + xVal + ', 0)'
+                    });
 
                 dateGraph.selectAll('.date')
                     .data(data.measurements.map(function (d) {
@@ -401,9 +425,26 @@ angular.module('de.stekoe.nfp.core')
                     .attr('class', ['graph', type].join(' '))
                     .attr("transform", "translate(0," + (options.marginTop || 0) + ")");
 
+                if(options.background) {
+                    var bg = cervixGraph.selectAll(['.', type, '-bg'].join(''))
+                        .data(data.measurements)
+                        .enter()
+                        .append('svg:rect')
+                        .attr('width', 20)
+                        .attr('height', 20)
+                        .attr("transform", function (d) {
+                            return "translate(" + (x(d.date)) + ", 0)";
+                        });
+
+                    if(options.background.clazz) {
+                        bg.attr('class', options.background.clazz)
+                    }
+                }
+
                 var s = cervixGraph.selectAll(['.', type].join(''))
                     .data(data.measurements)
                     .enter();
+
 
                 if (options.symbolFn) {
                     s.append('use')

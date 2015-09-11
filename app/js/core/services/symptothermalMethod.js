@@ -25,19 +25,28 @@ angular.module('de.stekoe.nfp')
                 return false;
             }
 
+            var lastFertileDay = 0;
             var t = TemperatureService.evaluateMenstrualCycle(measurements);
             var c = CervixService.getPeaks(measurements);
 
             if(c && c.length > 0) {
-                c = c.filter(function(cervixDay) {
+                var filtered = c.filter(function(cervixDay) {
                     return cervixDay >= t.day && cervixDay <= t.day + 2;
                 }).pop();
-
-                if(c) {
-                    return c + 3;
+                if(filtered) {
+                    lastFertileDay = filtered + 3;
+                    measurements[filtered].cervixPeak = true;
+                    measurements[filtered + 3].lastFertile = true;
                 } else {
-                    return t.day + 2;
+                    lastFertileDay = t.day + 2;
+                    var t2 = c.filter(function (cervixDay) {
+                        return cervixDay <= t.day;
+                    }).pop();
+                    measurements[t2 - 1].cervixPeak = true;
+                    measurements[t.day].lastFertile = true;
                 }
+
+                return lastFertileDay;
             }
 
             return false;

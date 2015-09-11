@@ -87,9 +87,30 @@
             fill: #b00000;
         }
 
-        .weekend {
+        .graph.dates .weekend {
             fill: #ff0000;
         }
+        .graph.dates  .dateBg.weekend {
+            fill: rgba(0,0,0,0.05);
+        }
+
+        .graph.zervix .peak {
+            fill: rgba(250, 220, 160, 1);
+        }
+        .graph.zervix .peak + rect {
+            fill: rgba(250, 220, 160, 0.8);
+        }
+        .graph.zervix .peak + rect + rect {
+            fill: rgba(250, 220, 160, 0.7);
+        }
+        .graph.zervix .peak + rect + rect + rect {
+            fill: rgba(250, 220, 160, 0.6);
+        }
+        .graph.zervix rect {
+            fill: transparent;
+        }
+
+
 
         .tooltip {
             position: absolute;
