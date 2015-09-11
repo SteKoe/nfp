@@ -1,10 +1,13 @@
 'use strict';
 
 angular.module('de.stekoe.nfp', [
+    'ngMaterial',
     'de.stekoe.nfp.core'
 ])
     .controller('IndexController', function ($scope, $http, Cervix, SymptothermalMethodService) {
         getCycle('cycle/cycle2.json');
+
+        $scope.myDate = new Date();
 
         function getCycle(url) {
             $http.get(url)

@@ -98,7 +98,9 @@ angular.module('de.stekoe.nfp.core')
                     return prev + cur.height;
                 }, 0);
 
-            var svgMargin = [0, 0, 0, 75]; // margins
+            console.log(data.measurements.length);
+
+            var svgMargin = [0, 0, 0, 50]; // margins
             var svgHeight = (sumGraphHeights + graphs[graphTypes[graphTypes.length - 1]].height) + svgMargin[0] + svgMargin[2];
             var svgWidth = ((data.measurements.length) * 20); // width
             var graphWidth = svgWidth;
@@ -146,7 +148,7 @@ angular.module('de.stekoe.nfp.core')
                     }
                 }
             });
-            drawSimpleGraph("Love", {
+            drawSimpleGraph("GV", {
                 marginTop: graphs.love.marginTop, symbolFn: function (d) {
                     var clazz = ['#'];
                     if (d.love === 1) {
