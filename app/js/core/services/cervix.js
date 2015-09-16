@@ -8,6 +8,13 @@ angular.module('de.stekoe.nfp')
         s: 3,
         S: 4
     })
+    .constant('CervixTypes', [
+        'cervix.t',
+        'cervix.o',
+        'cervix.f',
+        'cervix.s',
+        'cervix.S'
+    ])
     .service('CervixService', ['Cervix', function (Cervix) {
         return {
             getPeaks: getPeaks,

@@ -1,0 +1,23 @@
+{
+  "label": {
+    "date" : "Datum",
+    "cervix" : "Schleim",
+    "temperature" : "Temperatur",
+    "menstruation" : "Blutung"
+  },
+  "mens" : {
+    "none": "Keine Blutung",
+    "spotting": "Schmierblutung",
+    "light": "Leichte Blutung",
+    "normal": "Normale Blutung",
+    "strong": "Starke Blutung"
+  },
+  "cervix" : {
+    "none": "",
+    "t" : "t",
+    "o" : "ø",
+    "f" : "f",
+    "s" : "S",
+    "S" : "S+"
+  }
+}

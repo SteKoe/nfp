@@ -5,6 +5,9 @@ module.exports = function (config) {
 
         files: [
             'app/bower_components/angular/angular.js',
+            'app/bower_components/angular-aria/angular-aria.min.js',
+            'app/bower_components/angular-animate/angular-animate.min.js',
+            'app/bower_components/angular-material/angular-material.min.js',
             'app/bower_components/angular-mocks/angular-mocks.js',
 
             'app/js/app.js',

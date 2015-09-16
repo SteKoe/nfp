@@ -2,28 +2,41 @@
 
 angular.module('de.stekoe.nfp', [
     'ngMaterial',
+    'pascalprecht.translate',
+
     'de.stekoe.nfp.core'
 ])
-    .controller('IndexController', function ($scope, $http, Cervix, SymptothermalMethodService) {
+    .config(function ($translateProvider) {
+        $translateProvider.useStaticFilesLoader({
+            prefix: 'lang/',
+            suffix: '.json'
+        });
+        $translateProvider.preferredLanguage('de');
+    })
+    .controller('IndexController', function ($scope, $http, Cervix, CervixTypes, MenstruationTypes, SymptothermalMethodService) {
+        $scope.currentDay = {};
+
+        $scope.cervixTypes = CervixTypes;
+        $scope.mensisTypes = MenstruationTypes;
+
+        $scope.showDateInfo = function (day) {
+            console.log(day);
+            $scope.currentDay = day;
+        };
+
         getCycle('cycle/cycle2.json');
-
-        $scope.myDate = new Date();
-
         function getCycle(url) {
             $http.get(url)
                 .then(function (resp) {
                     var data = resp.data;
-                    var parseDate = d3.time.format("%Y-%m-%d").parse;
+                    var dateFormatter = d3.time.format("%Y-%m-%d");
                     data.forEach(function (d) {
-                        d.date = parseDate(d.date);
+                        d.date = dateFormatter.parse(d.date);
                         d.temperature = +d.temperature;
+                        if(dateFormatter(new Date()) === dateFormatter(d.date)) {
+                            $scope.currentDay = d;
+                        }
                     });
-                    var dates = data.map(function getDate(data) {
-                        return data.date;
-                    }).sort(function (a, b) {
-                        return new Date(a) - new Date(b);
-                    });
-                    data.push({date: d3.time.day.offset(dates[dates.length - 1], +1), temperature: 0});
                     $scope.data = {
                         measurements: data,
                         evaluated: SymptothermalMethodService.evaluate(data)

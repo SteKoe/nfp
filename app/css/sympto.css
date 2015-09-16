@@ -1,0 +1,95 @@
+svg {
+  font-size: 12px; }
+
+text {
+  fill: #555; }
+
+.axis {
+  shape-rendering: crispEdges; }
+
+.x.axis {
+  fill: #efefef; }
+
+.x.axis text {
+  display: none; }
+
+.x.axis line, .y.axis line {
+  stroke: #dcdce1; }
+
+.x.axis path {
+  display: none; }
+
+.y.axis path {
+  fill: none;
+  stroke: black; }
+
+.y.axis .tick:nth-child(6) line, .y.axis .tick:nth-child(11) line {
+  stroke: black; }
+
+.y.axis .tick:nth-child(1) text {
+  display: none; }
+
+.x.axis .tick:first-child line, .y.axis .tick:first-child line {
+  stroke: black; }
+
+#coverline {
+  stroke: blue;
+  stroke-dasharray: 5,5; }
+
+path.hm-marker {
+  stroke: #b00000;
+  fill: none; }
+
+rect.hm-marker {
+  fill: #f8dda1; }
+
+rect.unfruchtbar {
+  fill: #cbffb5; }
+
+text {
+  text-align: right; }
+
+.graph.dates text.weekend {
+  fill: #b00000; }
+
+.graph.dates .dateBg {
+  fill: transparent; }
+  .graph.dates .dateBg:hover {
+    fill: rgba(0, 0, 0, 0.075);
+    cursor: pointer; }
+
+.graph.temperature .temperaturePath {
+  stroke: #b00000;
+  stroke-width: 1; }
+
+.graph.temperature .temperaturePath.excludedValue {
+  stroke-dasharray: 3,3; }
+
+.graph.temperature .excludedTemperatureBrace {
+  fill: #b00000; }
+
+.graph.temperature .temperatureBubble {
+  fill: #b00000;
+  stroke: #b00000;
+  stroke-width: 2; }
+
+.graph.cervix rect {
+  fill: transparent; }
+
+.graph.mens use {
+  fill: #b00000; }
+
+.graph.coitus use {
+  fill: #b00000; }
+
+.tooltip {
+  position: absolute;
+  z-index: 999;
+  visibility: hidden;
+  background-color: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 3px #333;
+  padding: 3px 5px;
+  border-radius: 4px; }
+
+md-sidenav md-content section md-content {
+  padding: 0 20px; }

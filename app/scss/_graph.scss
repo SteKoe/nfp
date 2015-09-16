@@ -1,0 +1,122 @@
+$red: #b00000;
+$coverlineColor: blue;
+$hmMarkerFill: #f8dda1;
+$fertilityFill: #cbffb5;
+
+svg {
+  font-size: 12px;
+}
+
+text {
+  fill: #555;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+.x.axis {
+  fill: #efefef;
+}
+.x.axis text {
+  display: none;
+}
+.x.axis line, .y.axis line {
+  stroke: #dcdce1;
+}
+.x.axis path {
+  display: none;
+}
+
+.y.axis path {
+  fill: none;
+  stroke: black;
+}
+.y.axis .tick:nth-child(6) line, .y.axis .tick:nth-child(11) line {
+  stroke: black;
+}
+.y.axis .tick:nth-child(1) text {
+  display: none;
+}
+
+.x.axis .tick:first-child line, .y.axis .tick:first-child line {
+  stroke: black;
+}
+
+#coverline {
+  stroke: $coverlineColor;
+  stroke-dasharray: 5,5;
+}
+path.hm-marker {
+  stroke: $red;
+  fill: none;
+}
+rect.hm-marker {
+  fill: $hmMarkerFill;
+}
+rect.unfruchtbar {
+  fill: $fertilityFill;
+}
+text.date, text.time {
+}
+
+text {
+  text-align: right;
+}
+
+.graph {
+  &.dates {
+    text.weekend {
+      fill: $red;
+    }
+    .dateBg {
+      fill: transparent;
+
+      &:hover {
+        fill: rgba(0,0,0,0.075);
+        cursor: pointer;
+      }
+    }
+  }
+  &.temperature {
+    .temperaturePath {
+      stroke: $red;
+      stroke-width: 1;
+    }
+    .temperaturePath.excludedValue {
+      stroke-dasharray: 3,3;
+    }
+    .excludedTemperatureBrace {
+      fill: $red;
+    }
+    .temperatureBubble {
+      fill: $red;
+      stroke: $red;
+      stroke-width: 2;
+    }
+  }
+  &.cervix {
+    rect {
+      fill: transparent;
+    }
+  }
+  &.mens {
+    use {
+      fill: $red;
+    }
+  }
+  &.coitus {
+    use {
+      fill: $red;
+    }
+  }
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 999;
+  visibility: hidden;
+  background-color: rgba(255,255,255,0.75);
+  box-shadow: 0 0 3px #333;
+  padding: 3px 5px;
+  border-radius: 4px;
+}
